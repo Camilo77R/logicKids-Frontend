@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './Login.module.css';
+import styles from './Register.module.css';
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ nombre: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     const newErrors = {};
+    if (!form.nombre) newErrors.nombre = 'El nombre es requerido';
     if (!form.email) newErrors.email = 'El correo es requerido';
     else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Correo inválido';
     if (!form.password) newErrors.password = 'La contraseña es requerida';
+    else if (form.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -29,11 +32,12 @@ function Login() {
     if (!validateForm()) return;
     setLoading(true);
     setError('');
+    setSuccess('');
 
-    // Simulación de login (mock)
+    // Simulación de registro (mock)
     setTimeout(() => {
-      localStorage.setItem('token', 'mock-token');
-      navigate('/dashboard');
+      setSuccess('✅ Registro exitoso. Redirigiendo...');
+      setTimeout(() => navigate('/login'), 2000);
       setLoading(false);
     }, 500);
   };
@@ -42,11 +46,25 @@ function Login() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>LOGIC KIDS</h1>
-        <h2 className={styles.subtitle}>Inicio de sesión</h2>
+        <h2 className={styles.subtitle}>Registro de padre/tutor</h2>
 
         {error && <div className={styles.error}>{error}</div>}
+        {success && <div className={styles.success}>{success}</div>}
 
         <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Nombre completo</label>
+            <input
+              type="text"
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              className={`${styles.input} ${errors.nombre ? styles.inputError : ''}`}
+              placeholder="Ej: Juan Pérez"
+            />
+            {errors.nombre && <span className={styles.fieldError}>{errors.nombre}</span>}
+          </div>
+
           <div className={styles.inputGroup}>
             <label className={styles.label}>Correo electrónico</label>
             <input
@@ -74,16 +92,16 @@ function Login() {
           </div>
 
           <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? 'Ingresando...' : 'Iniciar sesión'}
+            {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>
 
         <p className={styles.registerLink}>
-          ¿No tienes cuenta? <a href="/register">Regístrate aquí</a>
+          ¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a>
         </p>
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Register;
