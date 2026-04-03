@@ -1,16 +1,38 @@
-# React + Vite
+# LOGIC KIDS - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Estado del Sprint (HU-03: 1-3 abril / HU-04: 4-5 abril)
 
-Currently, two official plugins are available:
+### ✅ COMPLETADO POR JONATHAN (HU-03 y HU-04)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+#### HU-03 Registro (entregado el 3 abril - fecha límite: 3 abril)
+- Formulario con: nombre, email, institución, contraseña, confirmar contraseña
+- Checkbox de términos y condiciones
+- Validaciones: campos requeridos, email válido, **contraseña mínimo 8 caracteres**, coincidencia de contraseñas
+- CSS modules (estilos separados)
+- Icono ver contraseña (👁️/🙈) en ambos campos
+- Mock temporal (simula registro mientras no hay backend real)
+- Redirección a `/dashboard` (con mock)
+- Enlace a login
 
-## React Compiler
+#### HU-04 Login (entregado el 3 abril - fecha límite: 5 abril)
+- Formulario con: email, contraseña
+- Enlace "¿Olvidaste tu contraseña?"
+- Validaciones: campos requeridos, email válido
+- CSS modules (misma paleta profesional)
+- Icono ver contraseña (👁️/🙈)
+- Mock temporal (simula login mientras no hay backend real)
+- Redirección a `/dashboard` (con mock)
+- Enlace a registro
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### ⏳ PENDIENTE DE DORADO (según Trello)
+- Conectar formularios con backend real
+- Manejar JWT y guardar token
+- Redirección real a dashboard
 
-## Expanding the ESLint configuration
+## Rama actual
+`feature/hu01-register-frontend`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Cómo correr el proyecto
+```bash
+npm install
+npm run dev
