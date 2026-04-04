@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRegister } from '../hooks/useRegister'; // ← Importar tu hook
+import { useRegister } from '../hooks/useRegister';
 import styles from './Register.module.css';
 
 function Register() {
   const navigate = useNavigate();
-  const { register, loading, backendError, clearError } = useRegister(); // ← usar hook
+  const { register, loading, backendError, clearError } = useRegister();
   
   const [form, setForm] = useState({
     nombre: '',
     email: '',
-    institucion: '',
+    institucion: '',    // lo mantenemos en el estado pero NO se envía al backend
     password: '',
     confirmPassword: ''
   });
@@ -25,7 +25,8 @@ function Register() {
     if (!form.nombre) newErrors.nombre = 'El nombre es requerido';
     if (!form.email) newErrors.email = 'El correo es requerido';
     else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Correo inválido';
-    if (!form.institucion) newErrors.institucion = 'La institución es requerida';
+    // Institución ya no es obligatoria para el backend, pero la dejamos como opcional en el frontend
+    // if (!form.institucion) newErrors.institucion = 'La institución es requerida';
     if (!form.password) newErrors.password = 'La contraseña es requerida';
     else if (form.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
     if (!form.confirmPassword) newErrors.confirmPassword = 'Confirma tu contraseña';
@@ -38,7 +39,7 @@ function Register() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
-    clearError(); // Limpiar error del backend al cambiar inputs
+    clearError();
     setSuccess('');
   };
 
@@ -46,9 +47,9 @@ function Register() {
     e.preventDefault();
     if (!validateForm()) return;
     
-    // Mapear datos del formulario a lo que espera el backend
+    // 🔥 Solo enviamos los campos que el backend espera
     const userData = {
-      name: form.nombre,      // backend espera "name"
+      nombre: form.nombre,    // ← campo correcto
       email: form.email,
       password: form.password
     };
@@ -71,12 +72,11 @@ function Register() {
         {success && <div className={styles.success}>{success}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Los mismos inputs, sin cambios */}
           <div className={styles.inputGroup}>
             <label className={styles.label}>Nombre Completo</label>
             <input
               type="text"
-              name="nombre"
+              name="nombre"          // ← importante: name="nombre"
               value={form.nombre}
               onChange={handleChange}
               className={`${styles.input} ${errors.nombre ? styles.inputError : ''}`}
@@ -98,17 +98,17 @@ function Register() {
             {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
           </div>
 
+          {/* Campo institución: lo mantenemos en el formulario pero es solo visual, no se envía */}
           <div className={styles.inputGroup}>
-            <label className={styles.label}>Institución</label>
+            <label className={styles.label}>Institución (opcional)</label>
             <input
               type="text"
               name="institucion"
               value={form.institucion}
               onChange={handleChange}
-              className={`${styles.input} ${errors.institucion ? styles.inputError : ''}`}
+              className={styles.input}
               placeholder="Nombre de la escuela o centro"
             />
-            {errors.institucion && <span className={styles.fieldError}>{errors.institucion}</span>}
           </div>
 
           <div className={styles.inputGroup}>

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../hooks/useLogin'; // ← importamos el hook
 import styles from './Login.module.css';
 
 function Login() {
   const navigate = useNavigate();
+  const { login, loading, error, clearError } = useLogin(); // ← usar hook
+
   const [form, setForm] = useState({ email: '', password: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -21,21 +22,15 @@ function Login() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
-    setError('');
+    clearError(); // limpiar error global al cambiar inputs
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    setLoading(true);
-    setError('');
 
-    // Simulación de login (mock)
-    setTimeout(() => {
-      localStorage.setItem('token', 'mock-token');
-      navigate('/dashboard');
-      setLoading(false);
-    }, 500);
+    // Llamada real al backend
+    await login(form.email, form.password);
   };
 
   return (
@@ -44,7 +39,7 @@ function Login() {
         <h1 className={styles.title}>LOGIC KIDS</h1>
         <h2 className={styles.subtitle}>Inicio de sesión</h2>
 
-        {error && <div className={styles.error}>{error}</div>}
+        {error && <div className={styles.error}>{error.message}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
