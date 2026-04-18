@@ -1,167 +1,221 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useRegister } from '../hooks/useRegister';
-import styles from './Register.module.css';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import LogicKidsLogo from "../components/LogicKidsLogo";
+import ThemeToggle from "../components/ThemeToggle";
+import { useRegister } from "../hooks/useRegister";
+import styles from "./AuthPage.module.css";
 
 function Register() {
   const navigate = useNavigate();
   const { register, loading, backendError, clearError } = useRegister();
   
   const [form, setForm] = useState({
-    nombre: '',
-    email: '',
-    institucion: '',    // lo mantenemos en el estado pero NO se envía al backend
-    password: '',
-    confirmPassword: ''
+    full_name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
-  const [success, setSuccess] = useState('');
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     const newErrors = {};
-    if (!form.nombre) newErrors.nombre = 'El nombre es requerido';
-    if (!form.email) newErrors.email = 'El correo es requerido';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Correo inválido';
-    // Institución ya no es obligatoria para el backend, pero la dejamos como opcional en el frontend
-    // if (!form.institucion) newErrors.institucion = 'La institución es requerida';
-    if (!form.password) newErrors.password = 'La contraseña es requerida';
-    else if (form.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
-    if (!form.confirmPassword) newErrors.confirmPassword = 'Confirma tu contraseña';
-    else if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Las contraseñas no coinciden';
-    if (!aceptaTerminos) newErrors.terminos = 'Debes aceptar los términos';
+    if (!form.full_name.trim()) newErrors.full_name = "El nombre es requerido";
+    if (!form.email) newErrors.email = "El correo es requerido";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Correo inválido";
+    if (!form.password) newErrors.password = "La contraseña es requerida";
+    else if (form.password.length < 8) {
+      newErrors.password = "Mínimo 8 caracteres";
+    }
+    if (!form.confirmPassword) newErrors.confirmPassword = "Confirma tu contraseña";
+    else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
+    }
+    if (!aceptaTerminos) newErrors.terminos = "Debes aceptar los términos";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: "" });
     clearError();
-    setSuccess('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     
-    // 🔥 Solo enviamos los campos que el backend espera
     const userData = {
-      nombre: form.nombre,    // ← campo correcto
-      email: form.email,
-      password: form.password
+      full_name: form.full_name.trim(),
+      email: form.email.trim().toLowerCase(),
+      password: form.password,
     };
     
     const ok = await register(userData);
     if (ok) {
-      setSuccess('✅ Cuenta creada. Redirigiendo...');
-      setTimeout(() => navigate('/dashboard'), 1000);
+      navigate("/dashboard");
     }
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>LOGIC KIDS</h1>
-        <h2 className={styles.subtitle}>Crear Cuenta</h2>
-        <h3 className={styles.subSubtitle}>Registrarte como titular</h3>
+    <div className={styles.screen}>
+      <div className={styles.background} />
+      <div className={styles.themeToggleWrap}>
+        <ThemeToggle />
+      </div>
 
-        {backendError && <div className={styles.error}>{backendError.message}</div>}
-        {success && <div className={styles.success}>{success}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Nombre Completo</label>
-            <input
-              type="text"
-              name="nombre"          // ← importante: name="nombre"
-              value={form.nombre}
-              onChange={handleChange}
-              className={`${styles.input} ${errors.nombre ? styles.inputError : ''}`}
-              placeholder="Ej. Dr. Javier Solís"
-            />
-            {errors.nombre && <span className={styles.fieldError}>{errors.nombre}</span>}
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Correo Electrónico</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
-              placeholder="tutor@logickids.edu"
-            />
-            {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
-          </div>
-
-          {/* Campo institución: lo mantenemos en el formulario pero es solo visual, no se envía */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Institución (opcional)</label>
-            <input
-              type="text"
-              name="institucion"
-              value={form.institucion}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder="Nombre de la escuela o centro"
-            />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Contraseña</label>
-            <div className={styles.passwordWrapper}>
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
-                placeholder="*********"
-              />
-              <button type="button" className={styles.passwordToggle} onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? "🙈" : "👁️"}
-              </button>
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <Link to="/login" className={styles.brand}>
+            <LogicKidsLogo />
+            <div className={styles.brandText}>
+              <strong>LogicKids</strong>
+              <span>Proyecto de grado · SENA</span>
             </div>
-            {errors.password && <span className={styles.fieldError}>{errors.password}</span>}
-          </div>
+          </Link>
+          <h1 className={styles.title}>Crear cuenta</h1>
+          <p className={styles.subtitle}>
+            Registro del tutor alineado con el backend real de Sprint 1 y con el estilo visual de LogicKids final.
+          </p>
+        </div>
 
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Confirmar Contraseña</label>
-            <div className={styles.passwordWrapper}>
+        <div className={styles.card}>
+          {backendError && (
+            <div className="auth-alert auth-alert--error">{backendError.message}</div>
+          )}
+
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            <div className={`auth-field ${errors.full_name ? "auth-field--error" : ""}`}>
+              <label htmlFor="register-full-name">Nombre completo</label>
               <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={form.confirmPassword}
+                id="register-full-name"
+                type="text"
+                name="full_name"
+                value={form.full_name}
                 onChange={handleChange}
-                className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
-                placeholder="*********"
+                placeholder="María García López"
+                autoComplete="name"
               />
-              <button type="button" className={styles.passwordToggle} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                {showConfirmPassword ? "🙈" : "👁️"}
-              </button>
+              {errors.full_name && (
+                <span className="auth-field__error">{errors.full_name}</span>
+              )}
             </div>
-            {errors.confirmPassword && <span className={styles.fieldError}>{errors.confirmPassword}</span>}
-          </div>
 
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxLabel}>
-              <input type="checkbox" checked={aceptaTerminos} onChange={(e) => setAceptaTerminos(e.target.checked)} />
-              Al registrarte, aceptas nuestros <strong>Términos de Servicio y Política de Privacidad</strong>.
+            <div className={`auth-field ${errors.email ? "auth-field--error" : ""}`}>
+              <label htmlFor="register-email">Correo electrónico</label>
+              <input
+                id="register-email"
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="tutor@logickids.edu"
+                autoComplete="email"
+              />
+              {errors.email && (
+                <span className="auth-field__error">{errors.email}</span>
+              )}
+            </div>
+
+            <div className={`auth-field ${errors.password ? "auth-field--error" : ""}`}>
+              <label htmlFor="register-password">Contraseña</label>
+              <div className="auth-password">
+                <input
+                  id="register-password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Mínimo 8 caracteres"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="auth-password__toggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? "Ocultar" : "Ver"}
+                </button>
+              </div>
+              {errors.password && (
+                <span className="auth-field__error">{errors.password}</span>
+              )}
+            </div>
+
+            <div
+              className={`auth-field ${
+                errors.confirmPassword ? "auth-field--error" : ""
+              }`}
+            >
+              <label htmlFor="register-confirm-password">Confirmar contraseña</label>
+              <div className="auth-password">
+                <input
+                  id="register-confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Repite tu contraseña"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="auth-password__toggle"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                >
+                  {showConfirmPassword ? "Ocultar" : "Ver"}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <span className="auth-field__error">{errors.confirmPassword}</span>
+              )}
+            </div>
+
+            <label className="auth-terms">
+              <input
+                type="checkbox"
+                checked={aceptaTerminos}
+                onChange={(e) => setAceptaTerminos(e.target.checked)}
+              />
+              <span>
+                Acepto continuar con el registro y entiendo que esta base corresponde
+                al cierre funcional de Sprint 1.
+              </span>
             </label>
-            {errors.terminos && <span className={styles.fieldError}>{errors.terminos}</span>}
+            {errors.terminos && (
+              <span className="auth-field__error">{errors.terminos}</span>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary auth-submit"
+            >
+              {loading ? (
+                <>
+                  <span className="spinner" />
+                  Creando cuenta...
+                </>
+              ) : (
+                "Crear cuenta"
+              )}
+            </button>
+          </form>
+
+          <div className={styles.note}>
+            En esta etapa el registro público crea tutores y deja la sesión activa al
+            terminar. Roles institucionales y datos extra vendrán después.
           </div>
+        </div>
 
-          <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? 'Creando cuenta...' : 'Crear Cuenta →'}
-          </button>
-        </form>
-
-        <p className={styles.loginLink}>
-          ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+        <p className={styles.footer}>
+          ¿Ya tienes cuenta?{" "}
+          <Link to="/login" className={styles.helperLink}>
+            Inicia sesión
+          </Link>
         </p>
       </div>
     </div>

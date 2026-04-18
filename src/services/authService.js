@@ -1,12 +1,28 @@
+/**
+ * authService
+ * ----------
+ * Traduce el contrato HTTP del backend a un formato simple para el frontend.
+ *
+ * POR QUÉ:
+ * Queremos que las páginas y hooks hablen siempre el mismo idioma:
+ * `tutor + token`, sin repetir manejo de errores en cada pantalla.
+ */
 import api from './api';
 
+// El backend responde dentro de `data`, así que normalizamos aquí una sola vez.
+const buildAuthSession = (responseData) => ({
+  tutor: responseData?.data?.tutor ?? null,
+  token: responseData?.data?.token ?? null,
+});
+
 const authService = {
+  // Registro público del tutor para Sprint 1.
   register: async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
       return {
         success: true,
-        data: response.data,
+        data: buildAuthSession(response.data),
         status: response.status
       };
     } catch (error) {
@@ -35,12 +51,13 @@ const authService = {
     }
   },
 
+  // Login del tutor usando email + password.
   login: async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       return {
         success: true,
-        data: response.data,
+        data: buildAuthSession(response.data),
         status: response.status
       };
     } catch (error) {
@@ -62,6 +79,24 @@ const authService = {
         success: false,
         message: error.response?.data?.message || 'Error al iniciar sesión. Intenta de nuevo.',
         status: error.response?.status || 500
+      };
+    }
+  },
+
+  // Verifica si el token guardado sigue sirviendo antes de abrir zonas privadas.
+  verifySession: async () => {
+    try {
+      const response = await api.get('/protected/me');
+      return {
+        success: true,
+        data: response.data?.data?.user ?? null,
+        status: response.status,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'No se pudo verificar la sesión.',
+        status: error.response?.status || 500,
       };
     }
   }
