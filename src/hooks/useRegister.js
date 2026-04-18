@@ -1,29 +1,40 @@
+/**
+ * useRegister
+ * -----------
+ * Hook de caso de uso para la pantalla de registro.
+ *
+ * IDEA:
+ * La pantalla arma el formulario, pero este hook decide cómo hablar con el backend
+ * y cómo dejar la sesión activa cuando el registro sale bien.
+ */
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService'; // ← Importa el default
+import authService from '../services/authService';
+import { useAuth } from './useAuth';
 
 export const useRegister = () => {
   const [loading, setLoading] = useState(false);
   const [backendError, setBackendError] = useState(null);
-  const navigate = useNavigate();
+  const { login: saveSession } = useAuth();
 
   const register = async (userData) => {
     setLoading(true);
     setBackendError(null);
     
-    const result = await authService.register(userData);
-    
-    if (result.success) {
-      // Guardar token y usuario si vienen en result.data
-      if (result.data?.token) {
-        localStorage.setItem('token', result.data.token);
-        localStorage.setItem('user', JSON.stringify(result.data.user));
+    try {
+      const result = await authService.register(userData);
+      
+      if (result.success) {
+        if (result.data?.token && result.data?.tutor) {
+          // En Sprint 1, registrar tutor también deja sesión activa.
+          saveSession(result.data);
+        }
+        return true;
+      } else {
+        setBackendError({ message: result.message });
+        return false;
       }
-      setTimeout(() => navigate('/dashboard'), 1000);
-      return true;
-    } else {
-      setBackendError({ message: result.message });
-      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
