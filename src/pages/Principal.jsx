@@ -43,15 +43,7 @@ const Home = () => {
   );
 };
 
-// Datos de juegos
-const gamesData = [
-  { title: "Math Adventure", grade: "K-2", icon: "🧮", color: "#FF6B6B", lessons: 24, rating: 4.8 },
-  { title: "Word Puzzle", grade: "1-3", icon: "📝", color: "#4ECDC4", lessons: 18, rating: 4.9 },
-  { title: "Typing Challenge", grade: "3-5", icon: "⌨️", color: "#45B7D1", lessons: 32, rating: 4.7 },
-  { title: "Science Lab", grade: "4-6", icon: "🔬", color: "#96CEB4", lessons: 28, rating: 4.8 },
-  { title: "Art Studio", grade: "K-5", icon: "🎨", color: "#FFEAA7", lessons: 15, rating: 4.6 },
-  { title: "Music Maker", grade: "1-4", icon: "🎵", color: "#DDA0DD", lessons: 22, rating: 4.9 },
-];
+
 
 // ============================================================
 // Componente HomeWelcome (Banner principal moderno)
@@ -84,6 +76,7 @@ const HomeWelcome = () => {
               className="welcome-title"
             >
               <span className="title-gradient">LogicKids</span>
+              
               <span className="title-sub">Transforma el juego en evidencia cognitiva</span>
             </motion.h1>
             
